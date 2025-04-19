@@ -1,25 +1,17 @@
-import os
-from openai import OpenAI
+import openai
 
-api_key = os.getenv('OPENAI_API_KEY')
-if not api_key:
-    raise ValueError("OPENAI_API_KEY environment variable is not set.")
-
-client = OpenAI(api_key=api_key)
-
-def generate_blog_post(product_name, keywords):
+def generate_blog_post(product_name, keywords, api_key):
+    if not api_key:
+        raise ValueError("API key must be provided.")
+    openai.api_key = api_key
     prompt = f"Write a 150-200 word SEO blog post about '{product_name}'. Naturally include the keywords: {', '.join(keywords)}."
     try:
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant that writes SEO blog posts."},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=200,
-            temperature=0.7
+        response = openai.Completion.create(
+            engine="text-davinci-003",
+            prompt=prompt,
+            max_tokens=200
         )
-        blog_content = response.choices[0].message.content.strip()
+        blog_content = response.choices[0].text.strip()
         print(f"Generated blog content for {product_name}.")
         return blog_content
     except Exception as e:
